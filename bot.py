@@ -13,8 +13,9 @@ from flask import Flask
 from threading import Thread
 
 # ========== НАСТРОЙКИ ==========
-BOT_TOKEN = "8039716101:AAH-wjh3I6BsZTHbbW0VKYbGEVXWF7YJ2_0"
-CHAT_ID = "1605067196"
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8039716101:AAH-wjh3I6BsZTHbbW0VKYbGEVXWF7YJ2_0")
+CHAT_ID = os.getenv("CHAT_ID", "1605067196")
+PORT = int(os.getenv("PORT", 10000))
 
 URLS = [
     "https://www.kufar.by/l/r~vitebskaya-obl/mobilnye-telefony/mt~apple?ar=v.or%3A18&sort=lst.d",
@@ -393,7 +394,7 @@ async def on_startup(dp):
 
 def run_flask():
     """Запускает Flask-сервер для пинга"""
-    app.run(host='0.0.0.0', port=10000)
+    app.run(host='0.0.0.0', port=PORT)
 
 if __name__ == "__main__":
     # Запускаем Flask в отдельном потоке (для Render)
