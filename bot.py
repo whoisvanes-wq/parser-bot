@@ -8,14 +8,11 @@ import re
 from datetime import datetime
 import json
 import os
-from urllib.parse import urlparse
-from flask import Flask
-from threading import Thread
+from urllib.parse import urlparse, parse_qs
 
 # ========== НАСТРОЙКИ ==========
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8039716101:AAH-wjh3I6BsZTHbbW0VKYbGEVXWF7YJ2_0")
-CHAT_ID = os.getenv("CHAT_ID", "1605067196")
-PORT = int(os.getenv("PORT", 10000))
+BOT_TOKEN = "8039716101:AAH-wjh3I6BsZTHbbW0VKYbGEVXWF7YJ2_0"
+CHAT_ID = "1605067196"
 
 URLS = [
     "https://www.kufar.by/l/r~vitebskaya-obl/mobilnye-telefony/mt~apple?ar=v.or%3A18&sort=lst.d",
@@ -23,21 +20,6 @@ URLS = [
 
 CHECK_INTERVAL = 120  # 2 минуты
 # =================================
-
-# Создаём Flask-приложение для пинга (чтобы Render не засыпал)
-app = Flask(__name__)
-
-@app.route('/')
-def health_check():
-    return "🤖 Kufar Bot работает! ✅"
-
-@app.route('/ping')
-def ping():
-    return "Pong! 🏓"
-
-@app.route('/stats')
-def stats():
-    return f"📊 Отправлено объявлений: {len(visited_links)}"
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
@@ -81,6 +63,9 @@ def save_visited(links):
 # Загружаем историю при старте
 visited_links = load_visited()
 print(f"📂 Загружено {len(visited_links)} отправленных объявлений")
+print("📋 Примеры сохраненных ссылок:")
+for i, link in enumerate(list(visited_links)[:3]):
+    print(f"  {i+1}. {link}")
 
 # ========== КЛАВИАТУРЫ ==========
 def main_menu():
@@ -296,7 +281,7 @@ async def check_updates_for_url(url, manual=False):
                 
                 ad = ads[0]
                 original_link = ad['link']
-                normalized_link = normalize_link(original_link)
+                normalized_link = normalize_link(original_link)  # Нормализуем ссылку
                 
                 print(f"[{datetime.now()}] 🔗 Оригинальная ссылка: {original_link}")
                 print(f"[{datetime.now()}] 🔗 Нормализованная ссылка: {normalized_link}")
@@ -392,16 +377,5 @@ async def on_startup(dp):
     # Запускаем фоновую задачу
     asyncio.create_task(scheduled_check())
 
-def run_flask():
-    """Запускает Flask-сервер для пинга"""
-    app.run(host='0.0.0.0', port=PORT)
-
 if __name__ == "__main__":
-    # Запускаем Flask в отдельном потоке (для Render)
-    flask_thread = Thread(target=run_flask)
-    flask_thread.daemon = True
-    flask_thread.start()
-    print("🌐 Flask сервер запущен на порту 10000")
-    
-    # Запускаем бота
     executor.start_polling(dp, on_startup=on_startup, skip_updates=True)
