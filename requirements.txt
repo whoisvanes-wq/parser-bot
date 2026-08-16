@@ -1,5 +1,4 @@
-aiogram
-aiohttp
-beautifulsoup4
-Flask
-requests
+aiogram==2.21
+aiohttp==3.8.6
+beautifulsoup4==4.12.2
+requests==2.31.0
